@@ -1,0 +1,233 @@
+---
+title: "reproducible_report"
+author: "Drew Shives"
+date: "11/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This report re-produces Experiment #1 reported in Schroeder and Epley (2015). The citation for this article is:
+
+Schroeder, J., & Epley, N. (2015). The Sound of Intellect: Speech Reveals a Thoughtful Mind, Increasing a Job Candidate’s Appeal. Psychological Science, 26(6), 877–891. https://doi.org/10.1177/0956797615572906
+
+The data was downloaded from [https://osf.io/nprmf/]
+
+Schroeder and Epley (2015) asked M.B.A. students to participate by providing spoken and written pitches to hypothetical prospective employers. The spoken pitches were video recorded creating three experimental conditions — audio, video, and written transcript. 162 individuals visiting the Museum of Science and Industry in Chicago were asked to review the candidates' pitches. Each of the pitches in each condition were reviewed by 3 evaluators (N = 54 per each condition).
+
+Evaluators were asked to assess each pitch across a variety of measures:
+
+- Intellect: Evaluators were asked to answer 3 questions about the candidate's intellect — (a) how competent the candidate seemed compared with the average candidate for an M.B.A. level position, (b) how thoughtful the candidate seemed compared with the average candidate for an M.B.A. level position, and (c) how intelligent the candidate compared with the average candidate for an M.B.A. level position. Each of these questions were answered on a scale of -5 to 5 (-5 = much less [competent, thoughtful, intelligent], 5 = much more [competent, thoughtful, intelligent]) and then averaged with one another to create a composite measure of intellect.
+
+- Impression: Evaluators were asked to report their general impressions of the candidate — (a) how much they liked the candidate, (b) how positive their overall impression of the candidate was, and (c) how negative their overall impression of the candidate was. Each of these was measured on a scale of 0 to 10 with 0 being the worst score and 10 being the best. These measures were then averaged with one another to form a composite measure of general impression.
+
+- Hire: Evaluators were asked to rate how likely they would be to hire the candidate (scale of 0 to 10 with 0 being the worst score and 10 being the best).
+
+Each of the experimental conditions (audio, video, written) were compared to one another for each measure (intellect, impression, hire) by several two independent samples t-tests and a one-way Analysis of Variance (ANOVA). Predictions made by the job candidates themselves were also analyzed, but are not included in this re-analysis.
+
+## Re-analysis
+
+```{r}
+# Load in libraries.
+
+library(tidyverse)
+library(haven)
+library(lsr)
+library(reshape2)
+library(xtable)
+library(schoRsch)
+library(broom)
+```
+
+```{r}
+# Load in data.
+
+data1 <- read_sav("data/Study1_data.sav")
+```
+
+### Table of means and standard deviations for each of intellect, impression, and hire.
+
+```{r}
+# Create a table of means and standard deviations for intellect, impression, and hire.
+
+table <- data1 %>%
+  group_by(Condition) %>%
+  summarise(n = n(), mean_intel = mean(intellect, na.rm = TRUE), sd_intel = sd(intellect, na.rm = TRUE), mean_imp = mean(impression, na.rm = TRUE), sd_imp = sd(impression, na.rm = TRUE), mean_hire = mean(hire, na.rm = TRUE), sd_hire = sd(hire, na.rm = TRUE))
+
+knitr::kable(table)
+```
+
+### Reproduction of the figure.
+
+```{r}
+# Reproduction of the main figure from Experiment #1.
+
+trunc_data <- data1 %>%
+  select(Condition, intellect, impression, hire)
+
+trunc_data_conditions <- trunc_data$Condition
+intellect <- trunc_data$intellect
+impression <- trunc_data$impression
+hire <- trunc_data$hire
+
+z_score = function(data) {
+  z_ <- (data - mean(data, na.rm = TRUE)) / sd(data, na.rm = TRUE)
+  return(z_)
+}
+
+intellect <- z_score(intellect)
+impression <- z_score(impression)
+hire <- z_score(hire)
+
+trunc_data <- data.frame(trunc_data_conditions, intellect, impression, hire)
+
+trunc_data <- trunc_data %>%
+  rename(Condition = trunc_data_conditions)
+
+melted_data <- melt(trunc_data, id = c("Condition"), variable.name = "Measure")
+
+grouped_data <- melted_data %>%
+  group_by(Measure, Condition) %>%
+  summarise(Mean = mean(value, na.rm = TRUE), SD = sd(value, na.rm = TRUE))
+
+grouped_data$Condition <- factor(grouped_data$Condition, levels = c("video", "audio", "transcript"))
+grouped_data$Measure <- factor(grouped_data$Measure, levels = c("intellect", "impression", "hire"))
+
+ggplot(data = grouped_data, mapping = aes(x = Measure, y = Mean, group = Condition, fill = Condition)) +
+  geom_bar(stat = "identity", 
+           position = "dodge") +
+  theme_classic(base_size = 12) +
+  geom_errorbar(aes(ymin = Mean - (SD / length(Condition)), 
+                ymax = Mean + (SD / length(Condition))), 
+                position = position_dodge(width = 0.9),
+                width = 0.2, 
+                color = "black") +
+  coord_cartesian(ylim = c(-0.8, 0.8)) +
+  scale_y_continuous(breaks = seq(-0.8, 0.8, 0.2)) +
+  ylab("Employers’ z-Scored Evaluation of Candidates") +
+  theme(axis.title.x = element_blank())
+  
+```
+
+### Splitting the total data frame into individual ones based on experimental condition.
+
+```{r}
+# Split the total data frame into individual ones based on condition.
+
+data1_1 <- data1 %>%
+  filter(Condition == "audio")
+
+data1_2 <- data1 %>%
+  filter(Condition == "transcript")
+
+data1_3 <- data1 %>%
+  filter(Condition == "video")
+```
+
+### One-way ANOVA on intellect as a function of experimental condition.
+
+```{r}
+# One-way ANOVA on intellect as a function of experimental condition.
+
+anova_test <- aov(intellect ~ Condition, data = data1)
+
+summary_output <- summary(anova_test)
+
+knitr::kable(xtable(summary_output))
+```
+
+### Two independent sample t-tests for the conditions and parameters specified in Experiment #1.
+
+```{r}
+# Two independent sample t-test between audio and written for intellect.
+
+audio_written_intellect <- t.test(data1_1$intellect, data1_2$intellect, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and video for intellect.
+
+audio_video_intellect <- t.test(data1_1$intellect, data1_3$intellect, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and written for impression
+
+audio_written_impression <- t.test(data1_1$impression, data1_2$impression, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and video for impression
+
+audio_video_impression <- t.test(data1_1$impression, data1_3$impression, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and written for hire
+
+audio_written_hire <- t.test(data1_1$hire, data1_2$hire, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and video for hire
+
+audio_video_hire <- t.test(data1_1$hire, data1_3$hire, var.equal = TRUE)
+```
+
+```{r}
+t_table <- map_df(list(audio_written_intellect, audio_video_intellect, audio_written_impression, audio_video_impression, audio_written_hire, audio_video_hire), tidy)
+
+t_table$Test <- c("Audio/Written Intellect", "Audio/Video Intellect", "Audio/Written Impression", "Audio/Video Impression", "Audio/Written Hire", "Audio/Video Hire")
+
+t_table <- t_table %>%
+  relocate(Test, .before = estimate)
+
+knitr::kable(t_table)
+```
+
+### Results
+
+Intellect for each job candidate in each Condition (Audio, Video, Written) was submitted to a one-way ANOVA.The main effect of Condition on Intelelct was significant, **F (2, 157) = 10.81, MSE = 51.88, p < 0.001**.
+
+Utilizing two independent sample t-tests, the audio condition was compared to the written and video conditions separately for intellect, impression, and hire.
+
+Evaluators who heard pitches **(M = 0.91, SD = 1.79)** rather than reading them **(M = -0.70, SD = 2.81)** rated the candidates' intellect more highly, **t(105) = 3.52, p < 0.001, confidence interval (CI) of the difference [0.70, 2.51], d = 0.68**. Evaluators who watched pitches **(M = 1.09, SD = 1.80)**, however, did not evaluate candidates' intellect differently than evaluators who listened to pitches, **t(104) = -0.51, p = 0.61, CI [-0.87, 0.51], d = 0.10**.
+
+Similarly, evaluators who heard pitches **(M = 5.69, SD = 1.96)** as opposed to reading them **(M = 4.78, SD = 2.64)** rated their impression of candidates more highly, **t(106) = 2.03, p = 0.04, CI [0.02, 1.80], d = 0.39**. Evaluators who watched pitches **(M = 5.98, SD = 1.91)** also did not differ in their impression of candidates from those who listened to their pitches, **t(106) = -0.76, p = 0.45, CI [-1.02, 0.45], d = 0.15**.
+
+Likelihood to hire followed a similar pattern with evaluators who heard pitches **(M = 4.34, SD = 2.26)** more likely to hire candidates than those who read their pitches **(M = 3.06, SD = 3.15)**, **t(103) = 2.39, p = 0.02, CI [0.22, 2.34], d = 0.47**. Evaluators who watched candidates' pitches **(M = 4.46, SD = 2.43)** were no more likely to hire a candidate than evaluators who heard the pitches, **t(105) = -0.27, p = 0.79, CI [-1.02, 0.78], d = 0.05**.
+
+## Discussion
+
+The re-analysis, unfortunately, did not reproduce the analysis reported by Schroeder and Epley (2015). This was mainly due to the authors reporting incorrect t-tests for Experiment #1. This can be inferred from the degrees of freedom reported for each test. For example, when comparing intellect between evaluators who listened to pitches and those who read them, the authors reported a degrees of freedom for their t-test as 157. This is impossible as the total number of evaluators per experimental condition (before attributing to any NAs in the data) is 54, meaning that the total amount of evaluators to be considered when calculating the degrees of freedom for the t-test is 108.
+
+Even still, the re-analysis was able to reproduce the general findings of Schroeder and Epley (2015) if not the exact numbers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
