@@ -27,7 +27,7 @@ Evaluators were asked to assess each pitch across a variety of measures:
 
 - Hire: Evaluators were asked to rate how likely they would be to hire the candidate (scale of 0 to 10 with 0 being the worst score and 10 being the best).
 
-Each of the experimental conditions (audio, video, written) were compared to one another for each measure (intellect, impression, hire) by several two independent samples t-tests and a one-way Analysis of Variance (ANOVA). Predictions made by the job candidates themselves were also analyzed, but are not included in this re-analysis.
+Each of the experimental conditions (audio, video, written) were compared to one another for each measure (intellect, impression, hire) by several two independent sample t-tests and a one-way Analysis of Variance (ANOVA). Predictions made by the job candidates themselves were also analyzed, but are not included in this re-analysis.
 
 ## Re-analysis
 
@@ -191,7 +191,7 @@ knitr::kable(t_table)
 
 ### Results
 
-Intellect for each job candidate in each Condition (Audio, Video, Written) was submitted to a one-way ANOVA.The main effect of Condition on Intelelct was significant, **F (2, 157) = 10.81, MSE = 51.88, p < 0.001**.
+Intellect for each job candidate in each Condition (Audio, Video, Written) was submitted to a one-way ANOVA.The main effect of Condition on Intellect was significant, **F (2, 157) = 10.81, MSE = 51.88, p < 0.001**.
 
 Utilizing two independent sample t-tests, the audio condition was compared to the written and video conditions separately for intellect, impression, and hire.
 

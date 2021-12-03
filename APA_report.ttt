@@ -1,0 +1,62 @@
+\begin{table*}[hbt]
+\ifnextchar[{\eatarg}{}
+[tbp]
+
+\begin{center}
+\begin{threeparttable}
+
+\caption{\label{tab:table}Means and Standard Deviations of Measures by Condition}
+
+\begin{tabular}{llllllll}
+\toprule
+Condition & \multicolumn{1}{c}{n} & \multicolumn{1}{c}{Mean Intel.} & \multicolumn{1}{c}{SD Intel.} & \multicolumn{1}{c}{Mean Impr.} & \multicolumn{1}{c}{SD Impr.} & \multicolumn{1}{c}{Mean Hire} & \multicolumn{1}{c}{SD Hire}\\
+\midrule
+audio & 54 & 0.91 & 1.79 & 5.69 & 1.96 & 4.34 & 2.26\\
+transcript & 54 & -0.70 & 2.81 & 4.78 & 2.64 & 3.06 & 3.15\\
+video & 54 & 1.09 & 1.80 & 5.98 & 1.91 & 4.46 & 2.43\\
+\bottomrule
+\end{tabular}
+
+\end{threeparttable}
+\end{center}
+
+\end{table*}
+\begin{table*}[hbt]
+\ifnextchar[{\eatarg}{}
+[tbp]
+
+\begin{center}
+\begin{threeparttable}
+
+\caption{\label{tab:unnamed-chunk-16}Results from the simulation-based power analysis.}
+
+\begin{tabular}{ll}
+\toprule
+effect\_sizes & \multicolumn{1}{c}{power}\\
+\midrule
+0.10 & 0.07\\
+0.15 & 0.13\\
+0.20 & 0.18\\
+0.25 & 0.26\\
+0.30 & 0.33\\
+0.35 & 0.43\\
+0.40 & 0.54\\
+0.45 & 0.67\\
+0.50 & 0.72\\
+0.55 & 0.83\\
+0.60 & 0.87\\
+0.65 & 0.91\\
+0.70 & 0.94\\
+0.75 & 0.97\\
+0.80 & 0.98\\
+0.85 & 1.00\\
+0.90 & 1.00\\
+0.95 & 1.00\\
+1.00 & 1.00\\
+\bottomrule
+\end{tabular}
+
+\end{threeparttable}
+\end{center}
+
+\end{table*}

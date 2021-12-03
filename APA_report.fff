@@ -1,0 +1,14 @@
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{APA_report_files/figure-latex/unnamed-chunk-15-1.pdf}
+\caption{\label{fig:unnamed-chunk-15}Results from Experiment \#1. Evaluators' standardized ratings of the job candidates' intellect, their general impressions of the candidates, and their likelihood of hiring the candidates. Results are shown separately for the video, audio, and transcript conditions. Error bars represent +1 and -1 SEM.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{APA_report_files/figure-latex/unnamed-chunk-17-1.pdf}
+\caption{\label{fig:unnamed-chunk-17}Simulation-based power curve for this design.}
+\end{figure*}

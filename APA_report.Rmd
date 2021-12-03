@@ -1,0 +1,341 @@
+---
+title             : "A Re-Analysis of Schroeder & Epley (2015)"
+shorttitle        : "Schroeder & Epley Re-Analysis"
+
+author: 
+  - name          : "Drew J. Shives"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "33-31 72nd Street, Jackson Heights, NY 11372"
+    email         : "dshives@gradcenter.cuny.edu"
+
+affiliation:
+  - id            : "1"
+    institution   : "The Graduate Center of the City University of New York"
+
+authornote: |
+  Drew J. Shives, Department of Psycholog, The Graduate Center of the City University of New York. Data from the orginal study used for this re-analysis can be found at https://osf.io/nprmf/
+
+abstract: |
+  This re-analysis seeks to reproduce the results from Experiment #1 of Schroeder and Epley (2015). In it, the authors sought to determine if listening, watching, or reading job candidates’ pitches to hypothetical potential employers influenced how the candidates were evaluated. The subsequent evaluation was determined by three measures: candidates’ perceived intellect, the general impression of the candidates, and the likelihood a candidate would be hired. Both Schroeder and Epley (2015) and the re-analysis found that there was a difference in all three measures between the audio and written conditions, but no difference between audio and video. Data from the orginal study used for this re-analysis can be found at https://osf.io/nprmf/
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+keywords          : "re-analysis, reproducibility, communication, voice, speech, mind perception, social cognition, decision making, open data"
+
+bibliography      : ["r-references.bib","references.bib"]
+
+floatsintext      : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+library("papaja")
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache.extra = knitr::rand_seed)
+```
+
+```{r}
+# Load in libraries.
+
+library(tidyverse)
+library(haven)
+library(lsr)
+library(reshape2)
+library(xtable)
+library(schoRsch)
+library(broom)
+library(pwr)
+```
+
+```{r}
+# Load in data.
+
+data1 <- read_sav("data/Study1_data.sav")
+```
+
+```{r}
+# Create a table of means and standard deviations for intellect, impression, and hire.
+
+table <- data1 %>%
+  group_by(Condition) %>%
+  summarise(n = n(), mean_intel = mean(intellect, na.rm = TRUE), sd_intel = sd(intellect, na.rm = TRUE), mean_imp = mean(impression, na.rm = TRUE), sd_imp = sd(impression, na.rm = TRUE), mean_hire = mean(hire, na.rm = TRUE), sd_hire = sd(hire, na.rm = TRUE))
+
+table_display <- table %>% 
+  rename(
+    "Mean Intel." = mean_intel,
+    "SD Intel." = sd_intel,
+    "Mean Impr." = mean_imp,
+    "SD Impr." = sd_imp,
+    "Mean Hire" = mean_hire,
+    "SD Hire" = sd_hire
+  )
+
+```
+
+```{r}
+# Reproduction of the main figure from Experiment #1.
+
+trunc_data <- data1 %>%
+  select(Condition, intellect, impression, hire)
+
+trunc_data_conditions <- trunc_data$Condition
+intellect <- trunc_data$intellect
+impression <- trunc_data$impression
+hire <- trunc_data$hire
+
+z_score = function(data) {
+  z_ <- (data - mean(data, na.rm = TRUE)) / sd(data, na.rm = TRUE)
+  return(z_)
+}
+
+intellect <- z_score(intellect)
+impression <- z_score(impression)
+hire <- z_score(hire)
+
+trunc_data <- data.frame(trunc_data_conditions, intellect, impression, hire)
+
+trunc_data <- trunc_data %>%
+  rename(Condition = trunc_data_conditions)
+
+melted_data <- melt(trunc_data, id = c("Condition"), variable.name = "Measure")
+
+grouped_data <- melted_data %>%
+  group_by(Measure, Condition) %>%
+  summarise(Mean = mean(value, na.rm = TRUE), SD = sd(value, na.rm = TRUE))
+
+grouped_data$Condition <- factor(grouped_data$Condition, levels = c("video", "audio", "transcript"))
+grouped_data$Measure <- factor(grouped_data$Measure, levels = c("intellect", "impression", "hire"))
+
+plot <- ggplot(data = grouped_data, mapping = aes(x = Measure, y = Mean, group = Condition, fill = Condition)) +
+  geom_bar(stat = "identity", 
+           position = "dodge") +
+  theme_classic(base_size = 12) +
+  geom_errorbar(aes(ymin = Mean - (SD / length(Condition)), 
+                ymax = Mean + (SD / length(Condition))), 
+                position = position_dodge(width = 0.9),
+                width = 0.2, 
+                color = "black") +
+  coord_cartesian(ylim = c(-0.8, 0.8)) +
+  scale_y_continuous(breaks = seq(-0.8, 0.8, 0.2)) +
+  ylab("Employers’ z-Scored Evaluation of Candidates") +
+  theme(axis.title.x = element_blank())
+  
+```
+
+```{r}
+# Split the total data frame into individual ones based on condition.
+
+data1_1 <- data1 %>%
+  filter(Condition == "audio")
+
+data1_2 <- data1 %>%
+  filter(Condition == "transcript")
+
+data1_3 <- data1 %>%
+  filter(Condition == "video")
+```
+
+```{r}
+# One-way ANOVA on intellect as a function of experimental condition.
+
+anova_test <- aov(intellect ~ Condition, data = data1)
+
+summary_output <- summary(anova_test)
+
+apa_output <- apa_print(summary_output)
+```
+
+```{r}
+# Two independent sample t-test between audio and written for intellect.
+
+audio_written_intellect <- t.test(data1_1$intellect, data1_2$intellect, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and video for intellect.
+
+audio_video_intellect <- t.test(data1_1$intellect, data1_3$intellect, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and written for impression
+
+audio_written_impression <- t.test(data1_1$impression, data1_2$impression, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and video for impression
+
+audio_video_impression <- t.test(data1_1$impression, data1_3$impression, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and written for hire
+
+audio_written_hire <- t.test(data1_1$hire, data1_2$hire, var.equal = TRUE)
+```
+
+```{r}
+# Two independent sample t-test between audio and video for hire
+
+audio_video_hire <- t.test(data1_1$hire, data1_3$hire, var.equal = TRUE)
+```
+
+```{r}
+t_table <- map_df(list(audio_written_intellect, audio_video_intellect, audio_written_impression, audio_video_impression, audio_written_hire, audio_video_hire), tidy)
+
+t_table$Test <- c("Audio/Written Intellect", "Audio/Video Intellect", "Audio/Written Impression", "Audio/Video Impression", "Audio/Written Hire", "Audio/Video Hire")
+
+t_table <- t_table %>%
+  relocate(Test, .before = estimate)
+```
+
+```{r, include = FALSE}
+# Simulation-based power analysis.
+
+effect_sizes <- seq(.1, 1, 0.05)
+mean_intel <- table$mean_intel[2]
+sd_intel <- table$sd_intel[2]
+
+sim_power <- function(x) {
+  for(i in x){
+    written <- rnorm(n = 54, mean = mean_intel, sd = sd_intel)
+    audio <- rnorm(n = 54, mean = (mean_intel + (i * sd_intel)), sd = sd_intel)
+    return(t.test(written, audio, var.equal = TRUE)$p.value)
+  }
+}
+
+power <- sapply(effect_sizes, 
+                FUN = function(x) {
+                  simulations <- replicate(1000, sim_power(x))
+                  simulations_power <- length(simulations[simulations < 0.05]) / length(simulations)
+                  return(simulations_power)
+                }
+)
+
+plot_df <- data.frame(effect_sizes, power)
+
+power_line <- ggplot(plot_df, aes(x=effect_sizes, y=power))+  
+  geom_point()+  
+  geom_line()
+```
+
+# Introduction
+
+Schroeder and Epley (2015) hypothesized was that a person's speech conveys their fundamental capacity to think (reasoning, thoughtfulness, intellect, etc.) more clearly than the semantic content of just language alone. Similar to how variability of movement is an identifier of biological life, variability of voice may indicate a capable, lively mind. Therefore, a person should be viewed as having a greater mental capacity when an observer hears what they have to say rather than reading it.
+
+To test this, M.B.A. students were asked to provide spoken and written pitches to hypothetical prospective employers. The spoken pitches were video recorded creating three experimental conditions — audio, video, and written transcript. Each of the pitches for each condition (54 total) were evaluated by 3 individuals each. The evaluators were asked to assess the candidate's intellect, general impression, and likelihood of hiring based on the pitch. Schroeder and Epley (2015) believed that candidate would be viewed more positively (greater intellect, better general impression, and more hireable) if their pitch was listened to or watched rather than if it were only read.
+
+# Methods
+
+## Participants
+
+18 M.B.A. students from the University of Chicago Booth School of Business were asked to provide the audio, video, and written transcripts of pitches to hypothetical prospective employers. They were provided a $5 Starbucks giftcard for their participation. 162 individuals visiting the Museum of Science and Industry in Chicago were asked to review the candidates' pitches in exchange for a food item. Each of the pitches in each condition were reviewed by 3 evaluators (N = 54 per each condition).
+
+## Material
+
+The M.B.A. students created pitches to hypothetical prospective employers which were video recorded. This created three separate experimental conditions — audio, video, and written transcript.
+
+## Procedure
+
+Upon listening, viewing, or reading a candidate's pitch, evaluators were asked to assess it across a variety of measures:
+
+- Intellect: Evaluators were asked to answer 3 questions about the candidate's intellect — (a) how competent the candidate seemed compared with the average candidate for an M.B.A. level position, (b) how thoughtful the candidate seemed compared with the average candidate for an M.B.A. level position, and (c) how intelligent the candidate compared with the average candidate for an M.B.A. level position. Each of these questions were answered on a scale of -5 to 5 (-5 = much less [competent, thoughtful, intelligent], 5 = much more [competent, thoughtful, intelligent]) and then averaged with one another to create a composite measure of intellect.
+
+- Impression: Evaluators were asked to report their general impressions of the candidate — (a) how much they liked the candidate, (b) how positive their overall impression of the candidate was, and (c) how negative their overall impression of the candidate was. Each of these was measured on a scale of 0 to 10 with 0 being the worst score and 10 being the best. These measures were then averaged with one another to form a composite measure of general impression.
+
+- Hire: Evaluators were asked to rate how likely they would be to hire the candidate (scale of 0 to 10 with 0 being the worst score and 10 being the best).
+
+## Data analysis
+We used `r cite_r("r-references.bib")` for all our analyses.
+
+Each of the experimental conditions (audio, video, written) were compared to one another for each measure (intellect, impression, hire) by several two independent sample t-tests and a one-way Analysis of Variance (ANOVA). Predictions made by the job candidates themselves were also analyzed, but are not included in this re-analysis.
+
+# Results
+
+Overall mean and standard deviation results for each experimental condition and measure can be viewed in Table 1 and Figure 1.
+
+Intellect for each job candidate in each Condition (Audio, Video, Written) was submitted to a one-way ANOVA.The main effect of Condition on Intellect was significant, `r apa_output$full_result`.
+
+Utilizing two independent sample t-tests, the audio condition was compared to the written and video conditions separately for intellect, impression, and hire.
+
+Evaluators who heard pitches (M = `r round(table$mean_intel[1], 2)`, SD = `r round(table$sd_intel[1], 2)`) rather than reading them (M = `r round(table$mean_intel[2], 2)`, SD = `r round(table$sd_intel[2], 2)`) rated the candidates' intellect more highly, `r apa_print(audio_written_intellect)$full_result`. Evaluators who watched pitches (M = `r round(table$mean_intel[3], 2)`, SD = `r round(table$sd_intel[3], 2)`), however, did not evaluate candidates' intellect differently than evaluators who listened to pitches, `r apa_print(audio_video_intellect)$full_result`.
+
+Similarly, evaluators who heard pitches (M = `r round(table$mean_imp[1], 2)`, SD = `r round(table$sd_imp[1], 2)`) as opposed to reading them (M = `r round(table$mean_imp[2], 2)`, SD = `r round(table$sd_imp[2], 2)`) rated their impression of candidates more highly, `r apa_print(audio_written_impression)$full_result`. Evaluators who watched pitches (M = `r round(table$mean_imp[3], 2)`, SD = `r round(table$sd_imp[3], 2)`) also did not differ in their impression of candidates from those who listened to their pitches, `r apa_print(audio_video_impression)$full_result`.
+
+Likelihood to hire followed a similar pattern with evaluators who heard pitches (M = `r round(table$mean_hire[1], 2)`, SD = `r round(table$sd_hire[1], 2)`) more likely to hire candidates than those who read their pitches (M = `r round(table$mean_hire[2], 2)`, SD = `r round(table$sd_hire[2], 2)`), `r apa_print(audio_written_hire)$full_result`. Evaluators who watched candidates' pitches (M = `r round(table$mean_hire[3], 2)`, SD = `r round(table$sd_hire[3], 2)`) were no more likely to hire a candidate than evaluators who heard the pitches, `r apa_print(audio_video_hire)$full_result`.
+
+# Simulation-Based Power Analysis
+
+The design of Experiment #1 centered around investigating whether hearing (or seeing) versus reading a candidate's pitch would change evaluators' perception of them in terms of intellect, general impression, and hireability. Each experimental condition (audio, video, and written) had 54 evaluations (N = 54). The focus of this simulation-based power analysis will be on intellect and at what effect size will there be a determinable difference from the written condition.
+
+Power represents the probability that an experimental design will reject the null-hypothesis given that there is a true effect. Power is thus dependent on the size of that true effect — a design will have greater power to detect a large difference versus a small one. Cohen's D, a mean difference in terms of standard deviation units, is a commonly used measure to define the true difference between treatments. (Power is also dependent on sample-size and alpha-criterion.)
+
+To begin, the overall mean score for intellect and the standard deviation of the mean intellect score are calculated for the written condition (`r round(table$mean_intel[2], 2)` and `r round(table$sd_intel[2], 2)`, respectively). Our goal is to determine how large of an effect size is needed to produce an ascertainable difference from the written condition.
+
+Using the rnorm function to generate simulated data for each subject, we model the effect of listening (or watching) to a candidate's pitch by increasing the mean in this condition by a proportion of the standard deviation. This proportion is determined by effect size; we used effect sizes ranging from 0.1 to 1.0. For each effect size, we run 1000 simulated experiments and save the p-value for the effect of the audio condition for each simulation. For each effect size, we then find the proportion of experimental simulations that had a p-value less than 0.5 as the proportion of experiments where the null can be rejected is the power of the design to detect an effect of each effect size.
+
+The below simulation finds that this design had a power of 0.75 to detect an effect of d = 0.5. It had power of 0.98 to detect effects of d = 0.8. The full results and power curve can be viewed in Table 2 and Figure 2, respectively.
+
+While the actual power of listening vs. reading for intellect is quite high (d = 0.68), it can be improved by increasing the amount of evaluators per condition, increasing the alpha parameter, or increasing the actual effect size. 
+
+# Discussion
+
+The re-analysis, unfortunately, did not reproduce the analysis reported by Schroeder and Epley (2015). This was mainly due to the authors reporting incorrect t-tests for Experiment #1. This can be inferred from the degrees of freedom reported for each test. For example, when comparing intellect between evaluators who listened to pitches and those who read them, the authors reported a degrees of freedom for their t-test as 157. This is impossible as the total number of evaluators per experimental condition (before attributing to any NAs in the data) is 54, meaning that the total amount of evaluators to be considered when calculating the degrees of freedom for the t-test is 108.
+
+Even still, the re-analysis was able to reproduce the general findings of Schroeder and Epley (2015) if not the exact numbers.
+
+
+```{r table, echo = FALSE, fig.cap = "Means and Standard Deviations of Measures by Condition"}
+apa_table(
+  table_display,
+  caption = "Means and Standard Deviations of Measures by Condition",
+  escape = TRUE
+)
+```
+
+```{r, echo = FALSE, fig.cap = "Results from Experiment #1. Evaluators' standardized ratings of the job candidates' intellect, their general impressions of the candidates, and their likelihood of hiring the candidates. Results are shown separately for the video, audio, and transcript conditions. Error bars represent +1 and -1 SEM."}
+plot(plot)
+```
+
+```{r, echo = FALSE, fig.cap = "Results from the simulation-based power analysis."}
+apa_table(
+  plot_df,
+  caption = "Results from the simulation-based power analysis.",
+  escape = TRUE
+)
+```
+
+```{r, echo = FALSE, fig.cap = "Simulation-based power curve for this design."}
+plot(power_line)
+```
+
+
+\newpage
+
+# References
+
+```{r create_r-references}
+r_refs(file = "r-references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id="refs" custom-style="Bibliography"></div>
+\endgroup
