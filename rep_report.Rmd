@@ -11,21 +11,21 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This report re-produces Experiment #1 reported in Schroeder and Epley (2015). The citation for this article is:
+This report re-produces Experiment \#1 reported in Schroeder and Epley (2015). The citation for this article is:
 
-Schroeder, J., & Epley, N. (2015). The Sound of Intellect: Speech Reveals a Thoughtful Mind, Increasing a Job Candidate’s Appeal. Psychological Science, 26(6), 877–891. https://doi.org/10.1177/0956797615572906
+Schroeder, J., & Epley, N. (2015). The Sound of Intellect: Speech Reveals a Thoughtful Mind, Increasing a Job Candidate's Appeal. Psychological Science, 26(6), 877--891. <https://doi.org/10.1177/0956797615572906>
 
-The data was downloaded from [https://osf.io/nprmf/]
+The data was downloaded from [<https://osf.io/nprmf/>]
 
-Schroeder and Epley (2015) asked M.B.A. students to participate by providing spoken and written pitches to hypothetical prospective employers. The spoken pitches were video recorded creating three experimental conditions — audio, video, and written transcript. 162 individuals visiting the Museum of Science and Industry in Chicago were asked to review the candidates' pitches. Each of the pitches in each condition were reviewed by 3 evaluators (N = 54 per each condition).
+Schroeder and Epley (2015) asked M.B.A. students to participate by providing spoken and written pitches to hypothetical prospective employers. The spoken pitches were video recorded creating three experimental conditions --- audio, video, and written transcript. 162 individuals visiting the Museum of Science and Industry in Chicago were asked to review the candidates' pitches. Each of the pitches in each condition were reviewed by 3 evaluators (N = 54 per each condition).
 
 Evaluators were asked to assess each pitch across a variety of measures:
 
-- Intellect: Evaluators were asked to answer 3 questions about the candidate's intellect — (a) how competent the candidate seemed compared with the average candidate for an M.B.A. level position, (b) how thoughtful the candidate seemed compared with the average candidate for an M.B.A. level position, and (c) how intelligent the candidate compared with the average candidate for an M.B.A. level position. Each of these questions were answered on a scale of -5 to 5 (-5 = much less [competent, thoughtful, intelligent], 5 = much more [competent, thoughtful, intelligent]) and then averaged with one another to create a composite measure of intellect.
+-   Intellect: Evaluators were asked to answer 3 questions about the candidate's intellect --- (a) how competent the candidate seemed compared with the average candidate for an M.B.A. level position, (b) how thoughtful the candidate seemed compared with the average candidate for an M.B.A. level position, and (c) how intelligent the candidate compared with the average candidate for an M.B.A. level position. Each of these questions were answered on a scale of -5 to 5 (-5 = much less [competent, thoughtful, intelligent], 5 = much more [competent, thoughtful, intelligent]) and then averaged with one another to create a composite measure of intellect.
 
-- Impression: Evaluators were asked to report their general impressions of the candidate — (a) how much they liked the candidate, (b) how positive their overall impression of the candidate was, and (c) how negative their overall impression of the candidate was. Each of these was measured on a scale of 0 to 10 with 0 being the worst score and 10 being the best. These measures were then averaged with one another to form a composite measure of general impression.
+-   Impression: Evaluators were asked to report their general impressions of the candidate --- (a) how much they liked the candidate, (b) how positive their overall impression of the candidate was, and (c) how negative their overall impression of the candidate was. Each of these was measured on a scale of 0 to 10 with 0 being the worst score and 10 being the best. These measures were then averaged with one another to form a composite measure of general impression.
 
-- Hire: Evaluators were asked to rate how likely they would be to hire the candidate (scale of 0 to 10 with 0 being the worst score and 10 being the best).
+-   Hire: Evaluators were asked to rate how likely they would be to hire the candidate (scale of 0 to 10 with 0 being the worst score and 10 being the best).
 
 Each of the experimental conditions (audio, video, written) were compared to one another for each measure (intellect, impression, hire) by several two independent sample t-tests and a one-way Analysis of Variance (ANOVA). Predictions made by the job candidates themselves were also analyzed, but are not included in this re-analysis.
 
@@ -140,7 +140,7 @@ summary_output <- summary(anova_test)
 knitr::kable(xtable(summary_output))
 ```
 
-### Two independent sample t-tests for the conditions and parameters specified in Experiment #1.
+### Two independent sample t-tests for the conditions and parameters specified in Experiment \#1.
 
 ```{r}
 # Two independent sample t-test between audio and written for intellect.
@@ -191,11 +191,11 @@ knitr::kable(t_table)
 
 ### Results
 
-Intellect for each job candidate in each Condition (Audio, Video, Written) was submitted to a one-way ANOVA.The main effect of Condition on Intellect was significant, **F (2, 157) = 10.81, MSE = 51.88, p < 0.001**.
+Intellect for each job candidate in each Condition (Audio, Video, Written) was submitted to a one-way ANOVA.The main effect of Condition on Intellect was significant, **F (2, 157) = 10.81, MSE = 51.88, p \< 0.001**.
 
 Utilizing two independent sample t-tests, the audio condition was compared to the written and video conditions separately for intellect, impression, and hire.
 
-Evaluators who heard pitches **(M = 0.91, SD = 1.79)** rather than reading them **(M = -0.70, SD = 2.81)** rated the candidates' intellect more highly, **t(105) = 3.52, p < 0.001, confidence interval (CI) of the difference [0.70, 2.51], d = 0.68**. Evaluators who watched pitches **(M = 1.09, SD = 1.80)**, however, did not evaluate candidates' intellect differently than evaluators who listened to pitches, **t(104) = -0.51, p = 0.61, CI [-0.87, 0.51], d = 0.10**.
+Evaluators who heard pitches **(M = 0.91, SD = 1.79)** rather than reading them **(M = -0.70, SD = 2.81)** rated the candidates' intellect more highly, **t(105) = 3.52, p \< 0.001, confidence interval (CI) of the difference [0.70, 2.51], d = 0.68**. Evaluators who watched pitches **(M = 1.09, SD = 1.80)**, however, did not evaluate candidates' intellect differently than evaluators who listened to pitches, **t(104) = -0.51, p = 0.61, CI [-0.87, 0.51], d = 0.10**.
 
 Similarly, evaluators who heard pitches **(M = 5.69, SD = 1.96)** as opposed to reading them **(M = 4.78, SD = 2.64)** rated their impression of candidates more highly, **t(106) = 2.03, p = 0.04, CI [0.02, 1.80], d = 0.39**. Evaluators who watched pitches **(M = 5.98, SD = 1.91)** also did not differ in their impression of candidates from those who listened to their pitches, **t(106) = -0.76, p = 0.45, CI [-1.02, 0.45], d = 0.15**.
 
@@ -206,28 +206,3 @@ Likelihood to hire followed a similar pattern with evaluators who heard pitches 
 The re-analysis, unfortunately, did not reproduce the analysis reported by Schroeder and Epley (2015). This was mainly due to the authors reporting incorrect t-tests for Experiment #1. This can be inferred from the degrees of freedom reported for each test. For example, when comparing intellect between evaluators who listened to pitches and those who read them, the authors reported a degrees of freedom for their t-test as 157. This is impossible as the total number of evaluators per experimental condition (before attributing to any NAs in the data) is 54, meaning that the total amount of evaluators to be considered when calculating the degrees of freedom for the t-test is 108.
 
 Even still, the re-analysis was able to reproduce the general findings of Schroeder and Epley (2015) if not the exact numbers.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
